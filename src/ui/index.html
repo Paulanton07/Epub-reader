@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mindful Reader</title>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        // Simple Tauri API check
+        console.log('Starting application...');
+        
+        // Check Tauri availability immediately
+        function checkTauriAPI() {
+            if (window.__TAURI__) {
+                console.log('✅ Tauri API found!');
+                return true;
+            }
+            console.log('⏳ Tauri API not yet available...');
+            return false;
+        }
+        
+        // Initial check
+        checkTauriAPI();
+        
+        // Wait for DOM and check again
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, checking Tauri again...');
+            setTimeout(() => {
+                if (checkTauriAPI()) {
+                    console.log('Tauri API ready for use!');
+                } else {
+                    console.log('Tauri API still not available - will use fallback mode');
+                }
+            }, 500);
+        });
+    </script>
+</head>
+<body>
+    <div id="app">
+        <!-- Library View -->
+        <div id="library-view" class="library-view">
+            <header class="library-header">
+                <h1>📚 My Library</h1>
+                <div class="library-actions">
+                    <button id="add-book-btn" class="btn btn-primary">+ Add Book</button>
+                    <button id="library-settings-btn" class="btn btn-secondary">⚙️ Settings</button>
+                </div>
+            </header>
+            
+            <div class="library-grid" id="library-grid">
+                <!-- Books will be added here dynamically -->
+            </div>
+            
+            <div class="library-empty" id="library-empty">
+                <div class="empty-state">
+                    <div class="empty-icon">📖</div>
+                    <h2>Your Library is Empty</h2>
+                    <p>Add your first book to start your reading journey</p>
+                    <button id="add-first-book-btn" class="btn btn-large">Add Your First Book</button>
+                    <div class="file-types">
+                        <span>Supports EPUB, PDF, and TXT files</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reading View -->
+        <div id="reading-view" class="reading-view hidden">
+            <!-- Book Header -->
+            <div class="book-header">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <button id="back-to-library" class="back-btn">← Library</button>
+                    <button id="toc-btn" class="settings-btn" title="Table of Contents">📑</button>
+                </div>
+                <div class="book-info">
+                    <h2 id="book-title">Book Title</h2>
+                    <p id="book-author">Author</p>
+                    <div class="page-counter" id="header-page-counter">
+                        <span class="page-info">Page <span id="current-page-num">1</span> of <span id="total-pages-num">100</span></span>
+                    </div>
+                </div>
+                <button id="reading-settings-btn" class="settings-btn">⚙️</button>
+            </div>
+
+            <!-- Book Container with Page Turn Animation -->
+            <div class="book-container">
+                <div class="book" id="book">
+                    <div class="page left-page" id="left-page">
+                        <div class="page-content" id="left-content">
+                            <!-- Left page content -->
+                        </div>
+                        <div class="page-number left" id="left-page-num">2</div>
+                    </div>
+                    <div class="page right-page" id="right-page">
+                        <div class="page-content" id="right-content">
+                            <!-- Right page content -->
+                        </div>
+                        <div class="page-number right" id="right-page-num">3</div>
+                    </div>
+                    
+                    <!-- Turning page for animation -->
+                    <div class="page turning-page" id="turning-page">
+                        <div class="page-content" id="turning-content">
+                            <!-- Content for turning page -->
+                        </div>
+                        <div class="page-number" id="turning-page-num">4</div>
+                    </div>
+                </div>
+                
+                <!-- Touch areas for page turning -->
+                <div class="touch-area left-touch" id="left-touch"></div>
+                <div class="touch-area right-touch" id="right-touch"></div>
+            </div>
+
+            <!-- Enhanced 3D Book Container -->
+            <div class="book-3d hidden" id="book-3d">
+                <div class="book-pages">
+                    <!-- Book page stack (creates 3D depth) -->
+                    <div class="book-page-3d" data-page="background-1">
+                        <div class="page-content"><!-- Background page content --></div>
+                    </div>
+                    <div class="book-page-3d" data-page="background-2">
+                        <div class="page-content"><!-- Background page content --></div>
+                    </div>
+                    <div class="book-page-3d" data-page="current" id="current-3d-page">
+                        <div class="page-content" id="current-3d-content">
+                            <!-- Current page content -->
+                        </div>
+                    </div>
+                    <div class="book-page-3d" data-page="next-1">
+                        <div class="page-content"><!-- Next page preview --></div>
+                    </div>
+                    <div class="book-page-3d" data-page="next-2">
+                        <div class="page-content"><!-- Next page preview --></div>
+                    </div>
+                    <div class="book-page-3d" data-page="back-cover">
+                        <div class="page-content"><!-- Back pages --></div>
+                    </div>
+                </div>
+                
+                <!-- Book spine gap -->
+                <div class="book-gap"></div>
+                
+                <!-- Page flipping segments -->
+                <div class="flip-segments" id="flip-segments">
+                    <div class="flip-segment segment-1" data-segment="1">
+                        <div class="segment-content" id="segment-1-content"><!-- Segment content --></div>
+                    </div>
+                    <div class="flip-segment segment-2" data-segment="2">
+                        <div class="segment-content" id="segment-2-content"><!-- Segment content --></div>
+                    </div>
+                    <div class="flip-segment segment-3" data-segment="3">
+                        <div class="segment-content" id="segment-3-content"><!-- Segment content --></div>
+                    </div>
+                    <div class="flip-segment segment-4" data-segment="4">
+                        <div class="segment-content" id="segment-4-content"><!-- Segment content --></div>
+                    </div>
+                    <div class="flip-segment segment-5" data-segment="5">
+                        <div class="segment-content" id="segment-5-content"><!-- Segment content --></div>
+                    </div>
+                    <div class="flip-segment segment-6" data-segment="6">
+                        <div class="segment-content" id="segment-6-content"><!-- Segment content --></div>
+                    </div>
+                    <div class="flip-segment segment-7" data-segment="7">
+                        <div class="segment-content" id="segment-7-content"><!-- Segment content --></div>
+                    </div>
+                </div>
+                
+                <!-- Touch areas for 3D page turning -->
+                <div class="touch-area left-touch" id="left-touch-3d"></div>
+                <div class="touch-area right-touch" id="right-touch-3d"></div>
+            </div>
+
+            <!-- Progress Bar -->
+            <div class="progress-container">
+                <div class="progress-info-left">
+                    <span class="page-detail" id="page-detail">Page 1 of 100</span>
+                    <span class="progress-percentage" id="progress-percentage">0%</span>
+                </div>
+                <div class="progress-bar" id="progress-bar-clickable">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+                <div class="progress-info-right">
+                    <span class="reading-time" id="reading-time">~15 min left</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Overlay -->
+        <div id="settings-overlay" class="settings-overlay"></div>
+        
+        <!-- Loading Indicator -->
+        <div id="loading-indicator" class="loading-indicator hidden">
+            <div class="loading-spinner">
+                <div class="spinner"></div>
+                <p>Loading document...</p>
+            </div>
+        </div>
+
+        <!-- Settings Panel -->
+        <div id="settings-panel" class="settings-panel hidden">
+            <div class="settings-header">
+                <h3>📖 Reading Settings</h3>
+                <button id="close-settings" class="close-btn">✕</button>
+            </div>
+            
+            <div class="settings-content">
+                <!-- Theme Selection -->
+                <div class="setting-section">
+                    <h4>📚 Theme</h4>
+                    <div class="theme-grid">
+                        <div class="theme-option" data-theme="light">
+                            <div class="theme-preview light-preview"></div>
+                            <span>Light</span>
+                        </div>
+                        <div class="theme-option" data-theme="dark">
+                            <div class="theme-preview dark-preview"></div>
+                            <span>Dark</span>
+                        </div>
+                        <div class="theme-option" data-theme="sepia">
+                            <div class="theme-preview sepia-preview"></div>
+                            <span>Sepia</span>
+                        </div>
+                        <div class="theme-option" data-theme="night">
+                            <div class="theme-preview night-preview"></div>
+                            <span>Night</span>
+                        </div>
+                        <div class="theme-option" data-theme="cream">
+                            <div class="theme-preview cream-preview"></div>
+                            <span>Cream</span>
+                        </div>
+                        <div class="theme-option" data-theme="forest">
+                            <div class="theme-preview forest-preview"></div>
+                            <span>Forest</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Font Settings -->
+                <div class="setting-section">
+                    <h4>🔤 Typography</h4>
+                    <div class="setting-group">
+                        <label for="font-family">Font Family:</label>
+                        <select id="font-family">
+                            <option value="georgia">Georgia</option>
+                            <option value="times">Times New Roman</option>
+                            <option value="merriweather">Merriweather</option>
+                            <option value="crimson">Crimson Text</option>
+                            <option value="libre">Libre Baskerville</option>
+                            <option value="playfair">Playfair Display</option>
+                            <option value="lora">Lora</option>
+                            <option value="arial">Arial</option>
+                            <option value="helvetica">Helvetica</option>
+                        </select>
+                    </div>
+                    
+                    <div class="setting-group">
+                        <label for="font-size">Font Size: <span id="font-size-value">18px</span></label>
+                        <input type="range" id="font-size" min="12" max="32" value="18">
+                    </div>
+                    
+                    <div class="setting-group">
+                        <label for="line-height">Line Height: <span id="line-height-value">1.6</span></label>
+                        <input type="range" id="line-height" min="1.2" max="2.5" step="0.1" value="1.6">
+                    </div>
+                    
+                    <div class="setting-group">
+                        <label for="letter-spacing">Letter Spacing: <span id="letter-spacing-value">0px</span></label>
+                        <input type="range" id="letter-spacing" min="-1" max="3" step="0.1" value="0">
+                    </div>
+                </div>
+
+                <!-- Page Settings -->
+                <div class="setting-section">
+                    <h4>📄 Page Layout</h4>
+                    <div class="setting-group">
+                        <label for="words-per-page">Words per Page: <span id="words-per-page-value">400</span></label>
+                        <input type="range" id="words-per-page" min="200" max="800" step="25" value="400">
+                    </div>
+                    
+                    <div class="setting-group">
+                        <label for="page-margin">Page Margins: <span id="page-margin-value">Normal</span></label>
+                        <select id="page-margin">
+                            <option value="narrow">Narrow</option>
+                            <option value="normal" selected>Normal</option>
+                            <option value="wide">Wide</option>
+                            <option value="extra-wide">Extra Wide</option>
+                        </select>
+                    </div>
+                    
+                    <div class="setting-group">
+                        <label>
+                            <input type="checkbox" id="justify-text" checked>
+                            Justify Text
+                        </label>
+                    </div>
+                    
+                    <div class="setting-group">
+                        <label>
+                            <input type="checkbox" id="hyphenation" checked>
+                            Enable Hyphenation
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Animation Settings -->
+                <div class="setting-section">
+                    <h4>✨ Animation</h4>
+                    <div class="setting-group">
+                        <label for="animation-speed">Page Turn Speed: <span id="animation-speed-value">Normal</span></label>
+                        <select id="animation-speed">
+                            <option value="slow">Slow</option>
+                            <option value="normal" selected>Normal</option>
+                            <option value="fast">Fast</option>
+                            <option value="instant">Instant</option>
+                        </select>
+                    </div>
+                    
+                    <div class="setting-group">
+                        <label>
+                            <input type="checkbox" id="page-curl" checked>
+                            Page Curl Effect
+                        </label>
+                    </div>
+                    
+                    <div class="setting-group">
+                        <label for="reading-mode">Reading Mode: <span id="reading-mode-value">2D Book</span></label>
+                        <select id="reading-mode">
+                            <option value="2d" selected>2D Book (Traditional)</option>
+                            <option value="3d">3D Book (Realistic)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table of Contents Panel -->
+        <div id="toc-overlay" class="toc-overlay"></div>
+        <div id="toc-panel" class="toc-panel hidden">
+            <div class="toc-header">
+                <h3>📑 Table of Contents</h3>
+                <button id="close-toc" class="close-btn">✕</button>
+            </div>
+            
+            <ul id="chapter-list" class="chapter-list">
+                <!-- Chapters will be loaded here dynamically -->
+            </ul>
+        </div>
+
+        <!-- Search Overlay -->
+        <div id="search-overlay" class="search-overlay hidden">
+            <div class="search-container">
+                <div class="search-header">
+                    <h3>🔍 Search in Book</h3>
+                    <button id="close-search" class="close-btn">✕</button>
+                </div>
+                <div class="search-input-container">
+                    <input type="text" id="search-input" placeholder="Search for text...">
+                    <button id="search-btn" class="btn">Search</button>
+                </div>
+                <div id="search-results" class="search-results">
+                    <!-- Search results will appear here -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Loading Indicator -->
+        <div id="loading-indicator" class="loading-indicator hidden">
+            <div class="loading-spinner">
+                <div class="spinner"></div>
+                <p>Loading...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tauri API Scripts -->
+    <script>
+        // Force load Tauri API for Tauri 2.x
+        console.log('Loading Tauri API manually...');
+        
+        // Try different Tauri 2.x API loading methods
+        if (!window.__TAURI__) {
+            // Method 1: Check if it's available but not loaded
+            if (window.__TAURI_INTERNALS__) {
+                console.log('Found Tauri internals, trying to load API...');
+            }
+            
+            // Method 2: Wait for Tauri event
+            window.addEventListener('DOMContentLoaded', () => {
+                console.log('DOM loaded, checking Tauri again...');
+                setTimeout(() => {
+                    console.log('Delayed Tauri check:', !!window.__TAURI__);
+                }, 1000);
+            });
+        }
+    </script>
+    <script src="app.js"></script>
+</body>
+</html>

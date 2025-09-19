@@ -1,0 +1,82 @@
+(index):38 Starting application...
+(index):43 ✅ Tauri API found!
+(index):407 Loading Tauri API manually...
+(index):55 DOM loaded, checking Tauri again...
+app.js:1436 Starting application...
+app.js:76 Initializing application...
+app.js:10 ✅ Tauri v2 API loaded successfully
+app.js:85 DOM Elements check: Object
+app.js:136 Setting up event listeners...
+app.js:143 Navigation buttons: Object
+app.js:179 File operation buttons: Object
+app.js:1331 Settings loaded from database: Object
+app.js:118 Testing buttons...
+app.js:123 Add book button found, adding test click
+app.js:131 Keyboard shortcuts available: Ctrl+O (open file), Ctrl+F (search), Ctrl+, (settings)
+app.js:114 Application initialized successfully
+(index):43 ✅ Tauri API found!
+(index):58 Tauri API ready for use!
+app.js:126 Testing add book button click...
+app.js:1063 Loading: true
+app.js:769 Page updated: 48/197 (24%)
+app.js:769 Page updated: 48/197 (24%)
+app.js:700 Switched to 2D book mode
+app.js:1041 Show reading view called
+app.js:1044 Reading view shown
+app.js:1063 Loading: false
+app.js:1310 Settings saved to database
+app.js:320 TOC button clicked
+app.js:893 Toggle TOC called, tocPanel: <div id=​"toc-panel" class=​"toc-panel">​…​</div>​scroll
+app.js:937 Loading chapters for document: 2da4f894-62a1-4894-9c1f-6c048a61156a
+app.js:905 TOC panel toggled, visible? true
+app.js:939 Chapters loaded: Array(39)
+app.js:338 TOC overlay clicked - closing
+app.js:769 Page updated: 49/197 (24%)
+app.js:769 Page updated: 49/197 (24%)
+app.js:791 Progress saved: page 49/197 (38/157)
+app.js:769 Page updated: 48/197 (24%)
+app.js:769 Page updated: 48/197 (24%)
+app.js:791 Progress saved: page 48/197 (37/157)
+app.js:147 Back to library clicked
+app.js:1031 Show library view called
+app.js:1037 Library view shown
+app.js:1063 Loading: true
+app.js:769 Page updated: 48/197 (24%)
+app.js:769 Page updated: 48/197 (24%)
+app.js:700 Switched to 2D book mode
+app.js:1041 Show reading view called
+app.js:1044 Reading view shown
+app.js:1063 Loading: false
+app.js:1310 Settings saved to database
+app.js:157 Reading settings clicked
+app.js:862 Toggle settings called, settingsPanel: <div id=​"settings-panel" class=​"settings-panel hidden">​…​</div>​
+app.js:877 Settings panel toggled, visible? true
+app.js:293 Reading mode changed: 3d
+app.js:692 Switched to 3D book mode
+app.js:1310 Settings saved to database
+app.js:311 Settings overlay clicked - closing
+app.js:769 Page updated: 49/197 (24%)
+app.js:769 Page updated: 49/197 (24%)
+app.js:791 Progress saved: page 49/197 (38/157)
+app.js:1236 Key pressed: F12 Ctrl: false
+app.js:769 Page updated: 50/197 (25%)
+app.js:769 Page updated: 50/197 (25%)
+app.js:791 Progress saved: page 50/197 (39/157)
+app.js:769 Page updated: 51/197 (26%)
+app.js:769 Page updated: 51/197 (26%)
+app.js:791 Progress saved: page 51/197 (39/157)
+app.js:320 TOC button clicked
+app.js:893 Toggle TOC called, tocPanel: <div id=​"toc-panel" class=​"toc-panel visible">​…​</div>​
+app.js:937 Loading chapters for document: 2da4f894-62a1-4894-9c1f-6c048a61156a
+app.js:905 TOC panel toggled, visible? true
+app.js:939 Chapters loaded: (39) [{…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}, {…}]0: {id: 'cover_0', title: 'Chapter 1', start_position: 0, end_position: 32}1: {id: 'cover_1', title: 'Gone to Earth', start_position: 32, end_position: 428}2: {id: 'cover_2', title: 'Gone to Earth', start_position: 428, end_position: 1172}3: {id: 'cover_3', title: 'Chapter 1', start_position: 1172, end_position: 13649}4: {id: 'cover_4', title: 'Chapter 2', start_position: 13649, end_position: 30506}5: {id: 'cover_5', title: 'Chapter 3', start_position: 30506, end_position: 38794}6: {id: 'cover_6', title: 'Chapter 4', start_position: 38794, end_position: 47113}7: {id: 'cover_7', title: 'Chapter 5', start_position: 47113, end_position: 53638}8: {id: 'cover_8', title: 'Chapter 6', start_position: 53638, end_position: 59347}9: {id: 'cover_9', title: 'Chapter 7', start_position: 59347, end_position: 75804}10: {id: 'cover_10', title: 'Chapter 8', start_position: 75804, end_position: 94957}11: {id: 'cover_11', title: 'Chapter 9', start_position: 94957, end_position: 113900}12: {id: 'cover_12', title: 'Chapter 10', start_position: 113900, end_position: 128931}13: {id: 'cover_13', title: 'Chapter 11', start_position: 128931, end_position: 145302}14: {id: 'cover_14', title: 'Chapter 12', start_position: 145302, end_position: 157217}15: {id: 'cover_15', title: 'Chapter 13', start_position: 157217, end_position: 172314}16: {id: 'cover_16', title: 'Chapter 14', start_position: 172314, end_position: 189027}17: {id: 'cover_17', title: 'Chapter 15', start_position: 189027, end_position: 197985}18: {id: 'cover_18', title: 'Chapter 16', start_position: 197985, end_position: 206364}19: {id: 'cover_19', title: 'Chapter 17', start_position: 206364, end_position: 218773}20: {id: 'cover_20', title: 'Chapter 18', start_position: 218773, end_position: 227507}21: {id: 'cover_21', title: 'Chapter 19', start_position: 227507, end_position: 234477}22: {id: 'cover_22', title: 'Chapter 20', start_position: 234477, end_position: 247169}23: {id: 'cover_23', title: 'Chapter 21', start_position: 247169, end_position: 259514}24: {id: 'cover_24', title: 'Chapter 22', start_position: 259514, end_position: 267274}25: {id: 'cover_25', title: 'Chapter 23', start_position: 267274, end_position: 282222}26: {id: 'cover_26', title: 'Chapter 24', start_position: 282222, end_position: 291768}27: {id: 'cover_27', title: 'Chapter 25', start_position: 291768, end_position: 305431}28: {id: 'cover_28', title: 'Chapter 26', start_position: 305431, end_position: 322838}29: {id: 'cover_29', title: 'Chapter 27', start_position: 322838, end_position: 333657}30: {id: 'cover_30', title: 'Chapter 28', start_position: 333657, end_position: 346756}31: {id: 'cover_31', title: 'Chapter 29', start_position: 346756, end_position: 361754}32: {id: 'cover_32', title: 'Chapter 30', start_position: 361754, end_position: 369787}33: {id: 'cover_33', title: 'Chapter 31', start_position: 369787, end_position: 382803}34: {id: 'cover_34', title: 'Chapter 32', start_position: 382803, end_position: 394413}35: {id: 'cover_35', title: 'Chapter 33', start_position: 394413, end_position: 407725}36: {id: 'cover_36', title: 'Chapter 34', start_position: 407725, end_position: 417204}37: {id: 'cover_37', title: 'Chapter 35', start_position: 417204, end_position: 433455}38: {id: 'cover_38', title: 'Chapter 36', start_position: 433455, end_position: 453147}length: 39[[Prototype]]: Array(0)
+app.js:984 Going to chapter: {id: 'cover_3', title: 'Chapter 1', start_position: 1172, end_position: 13649}
+app.js:769 Page updated: 3/197 (1%)
+app.js:769 Page updated: 3/197 (1%)
+app.js:791 Progress saved: page 3/197 (1/157)
+app.js:769 Page updated: 4/197 (2%)
+app.js:769 Page updated: 4/197 (2%)
+app.js:791 Progress saved: page 4/197 (2/157)
+app.js:769 Page updated: 5/197 (2%)
+app.js:769 Page updated: 5/197 (2%)
+app.js:791 Progress saved: page 5/197 (3/157)

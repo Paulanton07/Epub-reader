@@ -1,0 +1,10 @@
+so I think further on, we need a refresh button on the top my left of screen. 
+content loading from app or uploading and rendering/ displaying is very slow, 
+
+I still do not see a page number display so reader can see clearly at a glance which page of how many they are.
+
+the contents menu is nice, also very slow to load.
+
+
+what if the publication has a wraper/image on cover, none of the media I have uploaded shows any colors pics, can you investigate that
+
