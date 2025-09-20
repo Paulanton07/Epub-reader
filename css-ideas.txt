@@ -1,246 +1,390 @@
-@import url('https://fonts.googleapis.com/css2?family=Indie+Flower&display=swap');
+@font-face {
+  font-family: PixelText;
+  src: url(https://assets.codepen.io/36869/Grand9KPixel.ttf);
+}
 
-* {
-    padding: 0;
-    margin: 0 auto;
+:root {
+  font-family: 'PixelText', serif;
+  font-optical-sizing: auto;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow: hidden;
+
+  /* sprite image */
+  --sprite-image: url(https://assets.codepen.io/36869/book.webp);
+
+  /* sprite animation settings */
+  /* animation duration */
+  --sprite-as: .8s;
+  /* animation direction */
+  --sprite-ad: normal;
+  /* animation fill mode */
+  --sprite-af: none;
+  /* animation play state */
+  --sprite-ap: running;
+  /* animation iteration count */
+  --sprite-ai: infinite;
+  /* animation timing function */
+  --sprite-at: linear;
+  /* animation frame rate */
+  --sprite-fr: 12;
+}
+
+@layer base {
+  *{
     box-sizing: border-box;
-}
+  }
+  body {
+    margin: 0;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    padding: 1rem;
+  }
 
-body {
-    font-family: 'Indie Flower', cursive;
-    background-color: #eee;
-    color: #555;
-    text-align: center;
-    padding: 4em 0;
-}
-
-$bookAngle: 60deg;
-$speed: 5s;
-$borderColor: #555;
-
-$images:
-    url('https://picsum.photos/420/300?random=1'),
-    url('https://picsum.photos/420/300?random=2'),
-    url('https://picsum.photos/420/300?random=3'),
-    url('https://picsum.photos/420/300?random=4'),
-    url('https://picsum.photos/420/300?random=5'), 
-    url('https://picsum.photos/420/300?random=1');
-
-// Preload to images
-.imgLoader {
-    position: fixed;
-    animation: preLoad 1s steps(1);
-    width: 1px;
-    height: 1px;
-
-    @keyframes preLoad {
-        @for $i from 0 through 4 {
-            #{$i * 10}% { background-image: nth($images, ($i + 1)); }
-        }
-        100% { display: none; }
-    }
-}
-
-.container {
+  .sprite-wrapper {
     position: relative;
-    width: 420px;
-    border: #fff solid 2px;
-    border-radius: 4px;
-    height: 420px;
-}
-
-.title {
-    position: absolute;
-    top: 45px; left: 0;
     width: 100%;
-    font-size: 2em;
-    font-weight: normal;
-    line-height: 1;
+    margin: 0 auto;
+  }
 }
 
-.credit {
-    position: absolute;
-    top: 100%; left: 0;
-    font-size: 0.9em;
-    text-align: left;
+@layer main {
+  /* Frame start position */
+  @property --sprite-fs {
+    syntax: "<integer>";
+    initial-value: 0;
+    inherits: true
+  }
+  @property --_progress {
+    syntax: "<percentage>";
+    inherits: false;
+    initial-value: 0%;
+  }
 
-}
+  .container {
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
 
-.book {
-    position: relative;
-    perspective: 630px;
-    perspective-origin: center 50px; 
-    transform: scale(1.2);
-    filter: drop-shadow(0px 10px 5px rgba(0,0,0,0.25));
-}
+    /* sprite columns */
+    --sprite-c: 5;
+    /* sprite image height */
+    --sprite-h: 3000;
+    /* sprite image width */
+    --sprite-w: 9600;
+    /* sprite frames */
+    --sprite-f: 7;
+    /* animation duration based on frame rate */
+    --sprite-as: calc(var(--sprite-f) / var(--sprite-fr) * 1s);
 
-.page {
-    width: 210px;
-    height: 300px;
-    background-color: #bbb;
-    position: absolute;
-    top: 0px; right: 50%;
-    transform-origin: 100% 100%;
-    border: solid $borderColor 2px;
-    background-size: 420px 300px;
-    background-position: center;
-    transform-style: preserve-3d;
+    /* frame rows */
+    --sprite-r: round(up, calc(var(--sprite-f) / var(--sprite-c)), 1);
+    /* frame height */
+    --sprite-sh: calc(var(--sprite-h) / var(--sprite-r));
+    /* frame target height, width */
+    --sprite-th: calc(var(--sprite-sh) / 2);
 
-    &:nth-child(1) {transform: rotateX($bookAngle) rotateY(3deg); }
-    &:nth-child(2) { transform: rotateX($bookAngle) rotateY(4.5deg); }
-    &:nth-child(3) {
-        transform: rotateX($bookAngle) rotateY(6deg);
-        animation: nextPage $speed*5 infinite $speed*-4.8 steps(1);
-        background-size: 420px 300px;
-        background-position: -2px -2px;
+    /* aspect ratio */
+    --sprite-ar: calc(var(--sprite-th) / var(--sprite-sh));
+    --sprite-uh: calc(var(--sprite-h) * var(--sprite-ar));
+    --sprite-uw: calc(var(--sprite-w) * var(--sprite-ar));
+
+    /* frame width */
+    --sprite-tw: calc(var(--sprite-uw) / var(--sprite-c));
+
+    > h1 {
+      color: #d2d4e1;
+      margin: 0;
+      width: fit-content;
+      font-weight: 500;
+      font-size: 1.75rem;
+      text-align: center;
     }
 
-    &:nth-child(4) { transform: rotateX($bookAngle) rotateY(177deg); }
-    &:nth-child(5) { transform: rotateX($bookAngle) rotateY(175.5deg); }
-    &:nth-child(6) {
-        transform: rotateX($bookAngle) rotateY(174deg);
-        overflow: hidden;
+    .book {
+      position: relative;
+      display: grid;
+      grid-template-areas:
+            "scroll scroll scroll"
+            "left markers right";
+      gap: 1rem;
 
-        &::after {
+      .sprite {
+        position: absolute;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: calc(1px * var(--sprite-th));
+        width: calc(1px * var(--sprite-tw));
+        margin: calc(-1px * calc((var(--sprite-th) - (var(--sprite-th) * 0.6107)) / 2)) calc(-1px * calc((var(--sprite-tw) - (var(--sprite-tw) * 0.7042)) / 2));
+        background-image: var(--sprite-image);
+        transform-origin: center center;
+        background-repeat: no-repeat;
+        background-size: calc(1px * var(--sprite-uw)) calc(1px * var(--sprite-uh));
+        z-index: -1;
+
+        /* Frame end position */
+        --sprite-fe: calc(var(--sprite-f) * (var(--slides) - 1));
+        --sprite-fs-n: mod(var(--sprite-fs), var(--sprite-f));
+        /* calculate the row and column position */
+        --row: calc(round(down, calc(calc(var(--sprite-tw) * var(--sprite-fs-n)) / var(--sprite-uw)), 1) * var(--sprite-th));
+        --col: mod(calc(var(--sprite-tw) * var(--sprite-fs-n)), var(--sprite-uw));
+
+        background-position: calc(-1px * var(--col)) calc(-1px * var(--row));
+        animation: frame var(--sprite-as) var(--sprite-at) 0s var(--sprite-ad) var(--sprite-af) var(--sprite-ap);
+        animation-timeline: --carousel-timeline;
+      }
+
+      .carousel {
+        counter-increment: curpage;
+        grid-area: scroll;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        overscroll-behavior-x: contain;
+
+        display: grid;
+        margin: 0 auto;
+        width: calc(1px * (var(--sprite-tw) * 0.7042));
+        height: calc(1px * (var(--sprite-th) * 0.6107));
+        grid: 1fr / auto-flow 100%;
+        scroll-timeline: --carousel-timeline x;
+        scroll-behavior: smooth;
+        scrollbar-width: none;
+        scroll-marker-group: after;
+
+        &::scroll-button(*) {
+          inline-size: 64px;
+          aspect-ratio: 1;
+          border-radius: 0;
+          border: 0;
+          background-color: transparent;
+          cursor: pointer;
+        }
+
+        &::scroll-button(*):disabled{
+          filter: invert(1);
+          opacity: 0.5;
+        }
+        &::scroll-button(*):not(:disabled):is(:hover, :active) {
+          filter: drop-shadow(2px 4px 6px black);
+        }
+
+        &::scroll-button(*):not(:disabled):active {
+          scale: 90%;
+        }
+
+        &::scroll-button(left) {
+          content: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMSIgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4IiB2aWV3Qm94PSIwIDAgMjMyLjAwMDAwMCAyNTYuMDAwMDAwIiBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJ4TWlkWU1pZCBtZWV0IiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdHJhbnNmb3JtPSJtYXRyaXgoLTEsMCwwLDEsMCwwKSI+Cgo8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgwLjAwMDAwMCwyNTYuMDAwMDAwKSBzY2FsZSgwLjEwMDAwMCwtMC4xMDAwMDApIiBmaWxsPSIjZmZmIiBzdHJva2U9Im5vbmUiPgo8cGF0aCBkPSJNMTE4MCAyMTEwIGwwIC0xODAgLTU0MCAwIC01NDAgMCAwIC03MjUgMCAtNzI1IDU0MCAwIDU0MCAwIDAgLTE4MCAwIC0xODAgMTIwIDAgMTIwIDAgMCA2MCAwIDYwIDYwIDAgNjAgMCAwIDYwIDAgNjAgNjAgMCA2MCAwIDAgNjAgMCA2MCA2MCAwIDYwIDAgMCA2MCAwIDYwIDYwIDAgNjAgMCAwIDYwIDAgNjAgNjAgMCA2MCAwIDAgNjAgMCA2MCA2MCAwIDYwIDAgMCA1MyBjMCAyOSA1IDU4IDEyIDY1IDcgNyAzNCAxMiA2MCAxMiBsNDggMCAwIDIzNSAwIDIzNSAtNjAgMCAtNjAgMCAwIDY1IDAgNjUgLTQ3IDAgYy02OCAwIC03NSAtNyAtNzEgLTcxIGwzIC01NCA1OCAtMyA1NyAtMyAwIC0xMTkgMCAtMTIwIC01NSAwIC01NCAwIC0zIC01NyAtMyAtNTggLTYwIC01IC02MCAtNSAtMyAtNTcgLTMgLTU3IC01NyAtMyAtNTcgLTMgLTMgLTU3IC0zIC01NyAtNTcgLTMgLTU3IC0zIC0zIC01NyAtMyAtNTcgLTU3IC0zIC01NyAtMyAtMyAtNTcgLTMgLTU3IC01NyAtMyAtNTcgLTMgLTMgLTU4IC0zIC01OCAtNTcgMyAtNTcgMyAtMyAxNzggLTIgMTc3IC01NDAgMCAtNTQwIDAgMiA0ODMgMyA0ODIgNTM3IDMgNTM2IDIgNyAzMiBjNCAxNyA2IDk3IDQgMTc3IGwtNCAxNDYgNTggMyA1NyAzIDAgLTYxIDAgLTYwIDYwIDAgNjAgMCAwIC02MCAwIC02MCA2MCAwIDYwIDAgMCAtNjAgMCAtNjAgNjAgMCA2MCAwIDAgLTYwIDAgLTYwIDYwIDAgNjAgMCAwIC02MCAwIC02MCA2MCAwIDYwIDAgMCA2MCAwIDYwIC02MCAwIC02MCAwIDAgNjAgMCA2MCAtNjAgMCAtNjAgMCAwIDYwIDAgNjAgLTYwIDAgLTYwIDAgMCA2MCAwIDYwIC02MCAwIC02MCAwIDAgNjAgMCA2MCAtNjAgMCAtNjAgMCAwIDYwIDAgNjAgLTEyMCAwIC0xMjAgMCAwIC0xODB6Ij48L3BhdGg+CjwvZz4KPC9zdmc+") / "Scroll Left";
+          grid-area: left;
+        }
+
+        &::scroll-button(right) {
+          content: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZlcnNpb249IjEuMCIgd2lkdGg9IjQ4IiBoZWlnaHQ9IjQ4IiB2aWV3Qm94PSIwIDAgMjMyLjAwMDAwMCAyNTYuMDAwMDAwIiBwcmVzZXJ2ZUFzcGVjdFJhdGlvPSJ4TWlkWU1pZCBtZWV0Ij4KCjxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDAuMDAwMDAwLDI1Ni4wMDAwMDApIHNjYWxlKDAuMTAwMDAwLC0wLjEwMDAwMCkiIGZpbGw9IiNmZmYiIHN0cm9rZT0ibm9uZSI+CjxwYXRoIGQ9Ik0xMTgwIDIxMTAgbDAgLTE4MCAtNTQwIDAgLTU0MCAwIDAgLTcyNSAwIC03MjUgNTQwIDAgNTQwIDAgMCAtMTgwIDAgLTE4MCAxMjAgMCAxMjAgMCAwIDYwIDAgNjAgNjAgMCA2MCAwIDAgNjAgMCA2MCA2MCAwIDYwIDAgMCA2MCAwIDYwIDYwIDAgNjAgMCAwIDYwIDAgNjAgNjAgMCA2MCAwIDAgNjAgMCA2MCA2MCAwIDYwIDAgMCA2MCAwIDYwIDYwIDAgNjAgMCAwIDUzIGMwIDI5IDUgNTggMTIgNjUgNyA3IDM0IDEyIDYwIDEyIGw0OCAwIDAgMjM1IDAgMjM1IC02MCAwIC02MCAwIDAgNjUgMCA2NSAtNDcgMCBjLTY4IDAgLTc1IC03IC03MSAtNzEgbDMgLTU0IDU4IC0zIDU3IC0zIDAgLTExOSAwIC0xMjAgLTU1IDAgLTU0IDAgLTMgLTU3IC0zIC01OCAtNjAgLTUgLTYwIC01IC0zIC01NyAtMyAtNTcgLTU3IC0zIC01NyAtMyAtMyAtNTcgLTMgLTU3IC01NyAtMyAtNTcgLTMgLTMgLTU3IC0zIC01NyAtNTcgLTMgLTU3IC0zIC0zIC01NyAtMyAtNTcgLTU3IC0zIC01NyAtMyAtMyAtNTggLTMgLTU4IC01NyAzIC01NyAzIC0zIDE3OCAtMiAxNzcgLTU0MCAwIC01NDAgMCAyIDQ4MyAzIDQ4MiA1MzcgMyA1MzYgMiA3IDMyIGM0IDE3IDYgOTcgNCAxNzcgbC00IDE0NiA1OCAzIDU3IDMgMCAtNjEgMCAtNjAgNjAgMCA2MCAwIDAgLTYwIDAgLTYwIDYwIDAgNjAgMCAwIC02MCAwIC02MCA2MCAwIDYwIDAgMCAtNjAgMCAtNjAgNjAgMCA2MCAwIDAgLTYwIDAgLTYwIDYwIDAgNjAgMCAwIDYwIDAgNjAgLTYwIDAgLTYwIDAgMCA2MCAwIDYwIC02MCAwIC02MCAwIDAgNjAgMCA2MCAtNjAgMCAtNjAgMCAwIDYwIDAgNjAgLTYwIDAgLTYwIDAgMCA2MCAwIDYwIC02MCAwIC02MCAwIDAgNjAgMCA2MCAtMTIwIDAgLTEyMCAwIDAgLTE4MHoiLz4KPC9nPgo8L3N2Zz4=") / "Scroll Right";
+          grid-area: right;
+          justify-self: flex-end;
+        }
+
+        &::scroll-marker-group {
+          content: "";
+          width: 100%;
+          height: 8px;
+          padding: 2px 0;
+          display: grid;
+          position: absolute;
+          grid-area: markers;
+
+          grid-auto-flow: column;
+          place-self: center;
+          overflow: hidden;
+          border: 1px solid #000;
+
+          background: linear-gradient(90deg, #f1e2b2 0%) no-repeat left center;
+          --_progress: calc(calc(100 / var(--slides)) * 1%);
+          background-size: var(--_progress, 20%) 100%;
+
+          animation: progress linear both;
+          animation-timeline: --carousel-timeline;
+        }
+
+        & > .carousel-item {
+          scroll-snap-stop: always;
+          scroll-snap-align: start;
+          animation: count-before linear forwards;
+          animation-range: exit;
+          counter-increment: page;
+          animation-timeline: view(x);
+
+          position: relative;
+          box-sizing: border-box;
+          color: #333;
+
+          &::scroll-marker {
             content: '';
-            width: 210px;
-            height: 300px;
-            position: absolute;
-            top: 0px; right: 0%;
-            transform-origin: center;
-            transform: rotateY(180deg);
-            animation: nextPage $speed*5 $speed*-4 infinite steps(1);
-            background-size: 420px 300px;
-            background-position: 100% -2px;
+            position: relative;
+            left: -1px;
+            width: 100%;
+            height: 100%;
+            display: block;
+            box-sizing: border-box;
+            box-shadow: 2px 0 0 #000;
+          }
+
+          &:last-of-type{
+            &::scroll-marker {
+              box-shadow: none;
+            }
+          }
+
+          .page-container {
+            display: flex;
+            gap: 3rem;
+            height: 100%;
+
+            animation: stay-centered linear both;
+            animation-timeline: view(x);
+            timeline-scope: --parallax-item;
+          }
+
+          .left-page, .right-page {
+            flex: 1;
+            font-size: small;
+            overflow: hidden;
+            display: grid;
+            grid-template-rows: 1fr auto;
+
+            &:after {
+              bottom: 15px;
+              color: hsl(45.71deg 69.23% 30%);
+            }
+
+            > div {
+              text-align: justify;
+              hyphens: auto;
+              line-height: normal;
+              display: block;
+              word-wrap: break-word;
+            }
+          }
+
+          .left-page {
+            padding: 20px 0 20px 20px;
+            &:after {
+              content: counter(curpage);
+            }
+          }
+
+          .right-page {
+            padding: 20px 20px 20px 0;
+            counter-increment: curpage;
+            &:after {
+              content: counter(curpage);
+              place-self: self-end;
+            }
+          }
         }
+      }
     }
-
-    @keyframes nextPage {
-        @for $i from 0 through 4 {
-            #{$i * 20}% { background-image: nth($images, ($i + 1)); }
-        }
-    }
+  }
 }
 
-.gap {
-    width: 10px;
-    height: 300px;
-    background: none;
-    transform: rotateX($bookAngle);
-    transform-origin: bottom;
-    position: absolute;
-    top: 0px; left: calc(50% - 5px);
+@media (width < 748px) {
+  .container {
+    --sprite-th: calc(var(--sprite-sh) / 2.5);
 
-    &::after {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        left: 50%;
-        transform: translate(-50%, 50%);
-        background-color: $borderColor;
-        width: 10px;
-        height: 5px;
-        border-radius: 50%;
+    > h1 {
+      font-size: 1.25rem;
     }
+
+    .page {
+      > div {
+        font-size: .6rem;
+      }
+    }
+  }
 }
 
-.pages, .flips {
-  transform-style: preserve-3d;
+@media (width < 560px) {
+  .container {
+    --sprite-th: calc(var(--sprite-sh) / 4);
+
+    > h1 {
+      font-size: 1rem;
+    }
+
+    .page {
+      > div {
+        font-size: .35rem;
+      }
+
+      &:after {
+        font-size: .5rem;
+      }
+    }
+  }
 }
 
-.flip {
-    width: 32px;
-    height: 300px;
-    position: absolute;
-    top: 0px;
-    transform-origin: 100% 100%;
-    right: 100%;
-    border: solid $borderColor;
-    border-width: 2px 0px;
-    perspective: 4200px;
-    perspective-origin: center; 
-    transform-style: preserve-3d;
-    background-size: 420px 300px;
-
-    &::after {
-        content: '';
-        position: absolute;
-        top: 0px; right: 0%;
-        width: 100%; height: 100%;
-        transform-origin: center;
-        background-size: 420px 300px;
-    }
-
-    &.flip1 {
-        right: 50%;
-        animation: flip1 $speed infinite ease-in-out;
-        border-width: 2px 2px 2px 0;
-
-        &::after {
-            animation: nextFlip1 $speed*5 $speed*-4 infinite steps(1);
-        }
-    }
-
-    &:not(.flip1) {
-        right: calc(100% - 2px);
-        top: -2px;
-        transform-origin: right;
-        animation: flip2 $speed ease-in-out infinite;
-    }
-
-    @for $i from 2 through 7 {
-        &.flip#{$i}::after { animation: nextFlip#{$i} $speed*5 $speed*-4 infinite steps(1); }
-    }
-    
-    &.flip7 {
-        width: 30px;
-        border-width: 2px 0px 2px 2px;
-        &::after { animation: nextFlip7 $speed*5 $speed*-4 infinite steps(1); }
-    }
-
-    @keyframes flip1 {
-        0%, 20% { transform: rotateX($bookAngle) rotateY(6deg); }
-        80%, 100% { transform: rotateX($bookAngle) rotateY(174deg); }
-    }
-
-    @keyframes flip2 {
-        0%, 20% { transform: rotateY(0deg) translateY(0px); }
-        50% { transform: rotateY(-15deg) translateY(0px); }
-    }
+@keyframes stay-centered {
+  entry 0% {
+    opacity: 0;
+    translate: -100%;
+  }
+  entry 75%  {
+    opacity: 0;
+    translate: -25%;
+  }
+  entry 100% {
+    opacity: 1;
+    translate: 0%;
+  }
+  exit 0% {
+    opacity: 1;
+    translate: 0%;
+  }
+  exit 50% {
+    opacity: 0;
+    translate: 50%;
+  }
+  exit 100% {
+    opacity: 0;
+    translate: 100%;
+  }
 }
 
-@keyframes nextFlip1 {
-    @for $i from 0 through 4 {
-        #{$i * 20}% { background-image: nth($images, ($i + 1)); background-position: -178px -2px; transform: rotateY(0deg); }
-        #{10 + ($i * 20)}% { background-image: nth($images, ($i + 2)); background-position: -210px -2px; transform: rotateY(180deg); }
-    }
+@keyframes count-before {
+  1%,
+  100% {
+    counter-increment: page curpage;
+  }
 }
 
-@for $i from 2 through 6 {
-    @keyframes nextFlip#{$i} {
-        @for $j from 0 through 4 {
-            #{$j * 20}% { background-image: nth($images, ($j + 1)); background-position: #{-148 + (($i - 2) * 30)}px -2px; transform: rotateY(0deg); }
-            #{((10 + ($j * 20)) + (($i - 1) * 0.5))}% { background-image: nth($images, ($j + 2)); background-position: #{-238 - (($i - 2) * 30)}px -2px; transform: rotateY(180deg); }
-        }
-    }
+@keyframes progress {
+  100% {
+    --_progress: 100%;
+  }
 }
 
-@keyframes nextFlip7 {
-    @for $i from 0 through 4 {
-        #{$i * 20}% { background-image: nth($images, ($i + 1)); background-position: -2px -2px; transform: rotateY(0deg); }
-        #{13 + ($i * 20)}% { background-image: nth($images, ($i + 2)); background-position: -388px -2px; transform: rotateY(180deg); }
-    }
+@keyframes frame {
+  to {
+    --sprite-fs: var(--sprite-fe);
+  }
 }
 
-.twitterLink {
-  position: fixed;
-  bottom: 0.5em; right: 0.5em;
-  & img {
-    width: 2em;
-    filter: grayscale(100%);
-    transition: filter 0.25s;
-    &:hover {
-      filter: grayscale(0%);
-    }
+@media (prefers-reduced-motion) {
+  * {
+    animation: none;
   }
 }

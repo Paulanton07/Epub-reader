@@ -493,6 +493,11 @@ function displayCurrentPage() {
         rightPageNum.textContent = nextPageIndex < documentPages.length ? (nextPageIndex + 1).toString() : '';
     }
     
+    // Update 3D book if in 3D mode
+    if (readingMode === '3d') {
+        create3DBook();
+    }
+    
     // Update all page counter elements
     updateAllPageCounters();
 }
@@ -532,7 +537,9 @@ function goToPage(page) {
 // Page Turn Animation
 function animatePageTurn(direction, callback) {
     if (readingMode === '3d') {
-        animate3DPageTurn(direction, callback);
+        // For 3D mode, animations are now handled by CSS classes
+        // Just execute the callback to change the page content
+        setTimeout(callback, 1000); // Match CSS animation duration
         return;
     }
     
@@ -557,7 +564,7 @@ function animatePageTurn(direction, callback) {
     }, 600);
 }
 
-// Enhanced 3D Book Page Turn Animation
+// Enhanced 3D Book Page Turn Animation with Realistic Page Curl
 function animate3DPageTurn(direction, callback) {
     if (is3DFlipping) {
         callback();
@@ -570,43 +577,58 @@ function animate3DPageTurn(direction, callback) {
     const page = document.querySelector(pageToAnimate);
     
     if (page) {
-        // Store original transform
         const isLeft = direction === 'prev';
         const originalTransform = isLeft ? 
-            'translate(-320px, -50%) rotateX(10deg) rotateY(8deg)' : 
-            'translate(-160px, -50%) rotateX(10deg) rotateY(-8deg)';
+            'translate(-410px, -50%) rotateX(10deg) rotateY(8deg)' : 
+            'translate(-230px, -50%) rotateX(10deg) rotateY(-8deg)';
         
-        // Create dramatic flip animation
-        page.style.transition = 'transform 0.9s cubic-bezier(0.25, 0.8, 0.25, 1)';
+        // Add dramatic page curl effect
+        page.style.transition = 'all 1.2s cubic-bezier(0.23, 1, 0.320, 1)';
+        page.style.transformStyle = 'preserve-3d';
         
-        // First phase: lift the page
+        // Phase 1: Lift and start curl (200ms)
         const liftTransform = isLeft ? 
-            'translate(-320px, -50%) rotateX(10deg) rotateY(20deg) scale(1.05)' : 
-            'translate(-160px, -50%) rotateX(10deg) rotateY(-20deg) scale(1.05)';
+            'translate(-410px, -50%) rotateX(5deg) rotateY(25deg) scale(1.08) translateZ(15px)' : 
+            'translate(-230px, -50%) rotateX(5deg) rotateY(-25deg) scale(1.08) translateZ(15px)';
         
         page.style.transform = liftTransform;
+        page.style.boxShadow = '0 25px 50px rgba(0,0,0,0.6)';
         
         setTimeout(() => {
-            // Second phase: flip the page
-            const flipTransform = isLeft ? 
-                'translate(-320px, -50%) rotateX(10deg) rotateY(180deg)' : 
-                'translate(-160px, -50%) rotateX(10deg) rotateY(-180deg)';
+            // Phase 2: Major curl and rotation (400ms)
+            const midTransform = isLeft ? 
+                'translate(-410px, -50%) rotateX(-10deg) rotateY(90deg) scale(1.1) translateZ(25px)' : 
+                'translate(-230px, -50%) rotateX(-10deg) rotateY(-90deg) scale(1.1) translateZ(25px)';
             
-            page.style.transform = flipTransform;
+            page.style.transform = midTransform;
+            page.style.boxShadow = '0 35px 70px rgba(0,0,0,0.8)';
             
             setTimeout(() => {
-                callback();
-                is3DFlipping = false;
+                // Phase 3: Complete the flip (400ms)
+                const flipTransform = isLeft ? 
+                    'translate(-410px, -50%) rotateX(15deg) rotateY(185deg) scale(0.95) translateZ(5px)' : 
+                    'translate(-230px, -50%) rotateX(15deg) rotateY(-185deg) scale(0.95) translateZ(5px)';
                 
-                // Reset the page transform after content update
+                page.style.transform = flipTransform;
+                page.style.opacity = '0.1';
+                
                 setTimeout(() => {
-                    const newPage = document.querySelector(pageToAnimate);
-                    if (newPage) {
-                        newPage.style.transition = 'transform 0.3s ease';
-                        newPage.style.transform = originalTransform;
-                    }
-                }, 50);
-            }, 500);
+                    // Execute callback and reset
+                    callback();
+                    is3DFlipping = false;
+                    
+                    // Reset page after content update
+                    setTimeout(() => {
+                        const newPage = document.querySelector(pageToAnimate);
+                        if (newPage) {
+                            newPage.style.transition = 'all 0.5s ease';
+                            newPage.style.transform = originalTransform;
+                            newPage.style.opacity = '1';
+                            newPage.style.boxShadow = '0 8px 20px rgba(0,0,0,0.3)';
+                        }
+                    }, 100);
+                }, 400);
+            }, 400);
         }, 200);
     } else {
         callback();
@@ -619,10 +641,10 @@ function ensure3DBookStructure() {
     const book3d = document.getElementById('book-3d');
     if (!book3d) return;
     
-    // Check if structure is already there
-    if (book3d.querySelector('.book-pages')) {
-        return; // Structure already exists
-    }
+    // Always recreate structure to ensure spine is visible
+    // if (book3d.querySelector('.book-pages')) {
+    //     return; // Structure already exists
+    // }
     
     // Recreate the 3D book structure
     book3d.innerHTML = `
@@ -772,166 +794,273 @@ function update3DBookPages() {
     });
 }
 
-// Create a simple but effective 3D book
-function create3DBook() {
+// Create Enhanced Two-Div 3D Book
+function createPureCSS3DBook() {
     const book3d = document.getElementById('book-3d');
-    if (!book3d) return;
+    if (!book3d) {
+        console.error('3D book container not found!');
+        return;
+    }
     
-    const currentPageContent = documentPages[currentPage] || 'No content available';
-    const nextPageContent = documentPages[currentPage + 1] || '';
+    // Get content for consecutive pages in reading order
+    const leftPageContent = documentPages[currentPage] || null;
+    const rightPageContent = documentPages[currentPage + 1] || null;
+    const prevPageContent = documentPages[currentPage - 1] || null;
+    const nextNextPageContent = documentPages[currentPage + 2] || null;
+    
+    console.log('Page content mapping:', {
+        currentPageIndex: currentPage,
+        leftPageContent: leftPageContent ? 'Has content' : 'No content',
+        rightPageContent: rightPageContent ? 'Has content' : 'No content',
+        leftPageNumber: currentPage + 1,
+        rightPageNumber: currentPage + 2
+    });
+    
+    if (!leftPageContent && documentPages.length === 0) {
+        leftPageContent = '<p>Welcome to your EPUB reader!</p><p>To get started, please load a book from the library. You can switch between 2D and 3D reading modes in the settings.</p><p>This is the enhanced 3D book view with realistic page turning!</p>';
+        rightPageContent = '<p>This is the next page of the book.</p><p>The new two-div system allows you to see both sides of pages as they turn, creating a more realistic book experience.</p><p>Click on the pages to turn them with enhanced physics!</p>';
+    }
+    
+    console.log('Creating enhanced 3D book:', {
+        currentPageIndex: currentPage,
+        leftPageNumber: currentPage + 1,
+        rightPageNumber: currentPage + 2,
+        totalPages: documentPages.length,
+        hasLeftContent: !!leftPageContent,
+        hasRightContent: !!rightPageContent,
+        leftContentPreview: leftPageContent ? leftPageContent.substring(0, 50) + '...' : 'None',
+        rightContentPreview: rightPageContent ? rightPageContent.substring(0, 50) + '...' : 'None'
+    });
     
     book3d.innerHTML = `
-        <div style="
-            position: relative;
-            width: 700px;
-            height: 450px;
-            margin: 0 auto;
-            perspective: 1200px;
-            perspective-origin: center center;
-            transform-style: preserve-3d;
-        ">
-            <!-- Back pages (for depth) -->
-            <div style="
-                position: absolute;
-                width: 320px;
-                height: 420px;
-                background: var(--page-bg);
-                border: 2px solid var(--border-color);
-                left: 50%;
-                top: 50%;
-                transform: translate(-50%, -50%) rotateX(15deg) rotateY(-2deg);
-                z-index: 1;
-                box-shadow: 0 15px 30px rgba(0,0,0,0.25);
-            "></div>
-            
-            <div style="
-                position: absolute;
-                width: 320px;
-                height: 420px;
-                background: var(--page-bg);
-                border: 2px solid var(--border-color);
-                left: 50%;
-                top: 50%;
-                transform: translate(-50%, -50%) rotateX(12deg) rotateY(-1deg);
-                z-index: 2;
-                box-shadow: 0 12px 25px rgba(0,0,0,0.2);
-            "></div>
-            
-            <!-- Main left page -->
-            <div class="page-3d-left" style="
-                position: absolute;
-                width: 320px;
-                height: 420px;
-                background: var(--page-bg);
-                border: 2px solid var(--border-color);
-                left: 50%;
-                top: 50%;
-                transform: translate(-320px, -50%) rotateX(10deg) rotateY(8deg);
-                transform-origin: right center;
-                z-index: 5;
-                padding: 20px;
-                font-size: 0.9rem;
-                line-height: 1.5;
-                overflow: hidden;
-                color: var(--text-primary);
-                box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-                cursor: pointer;
-                transition: transform 0.3s ease;
-            ">
-                ${currentPageContent.substring(0, 800) + (currentPageContent.length > 800 ? '...' : '')}
+        <div class="enhanced-book-container">
+            <div class="enhanced-3d-book" id="enhanced-3d-book">
+                
+                <!-- Left Page Stack -->
+                <div class="page-stack left-stack">
+                    <!-- Left Page (Front/Back divs) -->
+                    <div class="page-wrapper left-page-wrapper ${currentPage <= 0 ? 'disabled' : ''}" id="left-page-wrapper">
+                        <div class="page-front left-front">
+                            ${formatPageForDisplay(leftPageContent)}
+                            <div class="page-number left">${currentPage + 1}</div>
+                        </div>
+                        <div class="page-back left-back">
+                            ${prevPageContent ? formatPageForDisplay(prevPageContent) : '<div class="empty-page">Previous Page</div>'}
+                            <div class="page-number left">${currentPage > 0 ? currentPage : ''}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Book Spine -->
+                <div class="enhanced-spine"></div>
+                
+                <!-- Right Page Stack -->
+                <div class="page-stack right-stack">
+                    <!-- Right Page (Front/Back divs) -->
+                    <div class="page-wrapper right-page-wrapper ${currentPage >= documentPages.length - 1 ? 'disabled' : ''}" id="right-page-wrapper">
+                        <div class="page-front right-front">
+                            ${rightPageContent ? formatPageForDisplay(rightPageContent) : '<div class="empty-page">📖<br><small>End of Book</small></div>'}
+                            <div class="page-number right">${rightPageContent ? currentPage + 2 : ''}</div>
+                        </div>
+                        <div class="page-back right-back">
+                            ${nextNextPageContent ? formatPageForDisplay(nextNextPageContent) : '<div class="empty-page">Next Page</div>'}
+                            <div class="page-number right">${nextNextPageContent ? currentPage + 3 : ''}</div>
+                        </div>
+                    </div>
+                </div>
+                
             </div>
-            
-            <!-- Main right page -->
-            <div class="page-3d-right" style="
-                position: absolute;
-                width: 320px;
-                height: 420px;
-                background: var(--page-bg);
-                border: 2px solid var(--border-color);
-                left: 50%;
-                top: 50%;
-                transform: translate(-160px, -50%) rotateX(10deg) rotateY(-8deg);
-                transform-origin: left center;
-                z-index: 5;
-                padding: 20px;
-                font-size: 0.9rem;
-                line-height: 1.5;
-                overflow: hidden;
-                color: var(--text-primary);
-                box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-                cursor: pointer;
-                transition: transform 0.3s ease;
-            ">
-                ${nextPageContent ? (nextPageContent.substring(0, 800) + (nextPageContent.length > 800 ? '...' : '')) : '<div style="text-align: center; margin-top: 150px; opacity: 0.5;">End of book</div>'}
-            </div>
-            
-            <!-- Book spine -->
-            <div style="
-                position: absolute;
-                width: 12px;
-                height: 420px;
-                background: linear-gradient(to right, var(--border-color), var(--text-secondary));
-                left: 50%;
-                top: 50%;
-                transform: translate(-50%, -50%) rotateX(10deg);
-                z-index: 6;
-                border-radius: 6px;
-                box-shadow: 0 8px 15px rgba(0,0,0,0.4);
-            "></div>
         </div>
     `;
     
-    // Add click handlers for page turning
-    const leftPage = book3d.querySelector('.page-3d-left');
-    const rightPage = book3d.querySelector('.page-3d-right');
+    // Add enhanced click handlers for two-div structure
+    const leftWrapper = document.getElementById('left-page-wrapper');
+    const rightWrapper = document.getElementById('right-page-wrapper');
     
-    if (leftPage) {
-        leftPage.addEventListener('click', () => {
-            animate3DPageTurn('prev', () => {
-                previousPage();
-                create3DBook(); // Refresh content
-            });
-        });
-        
-        // Add hover effects
-        leftPage.addEventListener('mouseenter', () => {
-            if (!is3DFlipping) {
-                leftPage.style.transform = 'translate(-320px, -50%) rotateX(10deg) rotateY(12deg) scale(1.02)';
-                leftPage.style.boxShadow = '0 12px 25px rgba(0,0,0,0.4)';
+    console.log('Setting up enhanced click handlers:', {
+        leftWrapper: !!leftWrapper,
+        rightWrapper: !!rightWrapper,
+        leftClasses: leftWrapper?.className,
+        rightClasses: rightWrapper?.className
+    });
+    
+    if (leftWrapper) {
+        leftWrapper.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('Left page wrapper clicked! Current page:', currentPage);
+            
+            // Check if page is disabled
+            if (leftWrapper.classList.contains('disabled')) {
+                console.log('Left page is disabled - no action taken');
+                return;
+            }
+            
+            if (currentPage > 0) {
+                console.log('Triggering enhanced left page turn');
+                triggerEnhancedPageTurn('left');
+            } else {
+                console.log('Cannot go to previous page - already at first page');
             }
         });
         
-        leftPage.addEventListener('mouseleave', () => {
-            if (!is3DFlipping) {
-                leftPage.style.transform = 'translate(-320px, -50%) rotateX(10deg) rotateY(8deg)';
-                leftPage.style.boxShadow = '0 8px 20px rgba(0,0,0,0.3)';
-            }
-        });
+        // Setup left page properties
+        leftWrapper.style.pointerEvents = 'auto';
+        leftWrapper.title = 'Click left edge to turn to previous page';
+        leftWrapper.style.border = '2px solid rgba(255, 100, 100, 0.3)';
+        console.log('Enhanced left page click handler added');
     }
     
-    if (rightPage) {
-        rightPage.addEventListener('click', () => {
-            animate3DPageTurn('next', () => {
-                nextPage();
-                create3DBook(); // Refresh content
-            });
-        });
-        
-        // Add hover effects
-        rightPage.addEventListener('mouseenter', () => {
-            if (!is3DFlipping) {
-                rightPage.style.transform = 'translate(-160px, -50%) rotateX(10deg) rotateY(-12deg) scale(1.02)';
-                rightPage.style.boxShadow = '0 12px 25px rgba(0,0,0,0.4)';
+    if (rightWrapper) {
+        rightWrapper.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('Right page wrapper clicked! Current page:', currentPage, 'Total pages:', documentPages.length);
+            
+            // Check if page is disabled
+            if (rightWrapper.classList.contains('disabled')) {
+                console.log('Right page is disabled - no action taken');
+                return;
+            }
+            
+            if (currentPage < documentPages.length - 1) {
+                console.log('Triggering enhanced right page turn');
+                triggerEnhancedPageTurn('right');
+            } else {
+                console.log('Cannot go to next page - already at last page');
             }
         });
         
-        rightPage.addEventListener('mouseleave', () => {
-            if (!is3DFlipping) {
-                rightPage.style.transform = 'translate(-160px, -50%) rotateX(10deg) rotateY(-8deg)';
-                rightPage.style.boxShadow = '0 8px 20px rgba(0,0,0,0.3)';
-            }
-        });
+        // Setup right page properties
+        rightWrapper.style.pointerEvents = 'auto';
+        rightWrapper.title = 'Click right edge to turn to next page';
+        rightWrapper.style.border = '2px solid rgba(100, 255, 100, 0.3)';
+        console.log('Enhanced right page click handler added');
     }
+}
+
+// Format page content for enhanced 3D display (no scrollbars)
+function formatPageForDisplay(content) {
+    if (!content) {
+        return '<div style="display: flex; align-items: center; justify-content: center; height: 100%; color: var(--text-secondary); font-style: italic; text-align: center;">No content available</div>';
+    }
+    
+    // For 3D book, we need to fit content without scrolling
+    const maxLength = 600; // Reduced for better fit
+    let displayContent = content.length > maxLength ? content.substring(0, maxLength) + '...' : content;
+    
+    // Remove any existing paragraph styling
+    displayContent = displayContent.replace(/<p[^>]*>/g, '<p>');
+    
+    // If content doesn't have paragraph tags, wrap it
+    if (!displayContent.includes('<p>')) {
+        displayContent = '<p>' + displayContent + '</p>';
+    }
+    
+    // Apply 3D book optimized styling
+    return `<div style="height: 100%; overflow: hidden; display: flex; flex-direction: column;">
+        ${displayContent
+            .replace(/<p>/g, '<p style="margin-bottom: 1.2em; text-align: justify; line-height: 1.5; color: var(--text-primary); font-size: 0.9rem;">')}
+    </div>`;
+}
+
+// Enhanced page content formatting
+function formatPageContent(content, maxLength = 800) {
+    if (!content) return '';
+    
+    let truncated = content.length > maxLength ? content.substring(0, maxLength) + '...' : content;
+    
+    // Add some basic formatting improvements
+    return truncated
+        .replace(/<p>/g, '<p style="margin-bottom: 1.2em; text-align: justify;">')
+        .replace(/\n\n/g, '</p><p style="margin-bottom: 1.2em; text-align: justify;">');
+}
+
+// Enhanced Page Turn Function with Better Physics
+function triggerEnhancedPageTurn(direction) {
+    console.log(`Enhanced page turn triggered: ${direction}`);
+    
+    if (direction === 'left' && currentPage <= 0) {
+        console.log('Cannot turn left - at first page');
+        return;
+    }
+    if (direction === 'right' && currentPage >= documentPages.length - 1) {
+        console.log('Cannot turn right - at last page');
+        return;
+    }
+    
+    const wrapper = document.getElementById(direction === 'left' ? 'left-page-wrapper' : 'right-page-wrapper');
+    console.log('Found wrapper element:', !!wrapper, 'Current classes:', wrapper?.className);
+    
+    if (wrapper && !wrapper.classList.contains('turning')) {
+        console.log(`Starting enhanced ${direction} page turn`);
+        
+        // Add turning animation class with physics
+        wrapper.classList.add('turning');
+        wrapper.classList.add(direction === 'left' ? 'turning-left' : 'turning-right');
+        
+        // Stage 1: Lift and start turn (0-300ms)
+        setTimeout(() => {
+            wrapper.classList.add('midturn');
+            console.log(`${direction} page at mid-turn`);
+        }, 300);
+        
+        // Stage 2: Execute content change at peak of turn (600ms)
+        setTimeout(() => {
+            console.log(`Executing enhanced ${direction} page change`);
+            const oldPage = currentPage;
+            if (direction === 'left') {
+                // For left page, go back by 2 pages (previous spread)
+                if (currentPage >= 2) {
+                    currentPage -= 2;
+                    updateAllPageCounters();
+                    saveReadingProgress();
+                } else if (currentPage === 1) {
+                    currentPage = 0;
+                    updateAllPageCounters();
+                    saveReadingProgress();
+                }
+                console.log(`Left page turn: ${oldPage + 1} → ${currentPage + 1}`);
+            } else {
+                // For right page, go forward by 2 pages (next spread)
+                if (currentPage + 2 < documentPages.length) {
+                    currentPage += 2;
+                    updateAllPageCounters();
+                    saveReadingProgress();
+                } else if (currentPage + 1 < documentPages.length) {
+                    currentPage += 1;
+                    updateAllPageCounters();
+                    saveReadingProgress();
+                }
+                console.log(`Right page turn: ${oldPage + 1} → ${currentPage + 1}`);
+            }
+        }, 600);
+        
+        // Stage 3: Complete turn and update book (1000ms)
+        setTimeout(() => {
+            console.log(`Completing ${direction} page turn and updating book`);
+            createPureCSS3DBook();
+        }, 1000);
+        
+        // Stage 4: Clean up animation classes (1200ms)
+        setTimeout(() => {
+            wrapper.classList.remove('turning', 'turning-left', 'turning-right', 'midturn');
+            console.log(`Enhanced ${direction} page turn completed`);
+        }, 1200);
+        
+    } else {
+        console.log('Enhanced page turn blocked - no wrapper or already turning');
+    }
+}
+
+// Keep old function for backwards compatibility
+function triggerPageTurn(direction) {
+    triggerEnhancedPageTurn(direction);
+}
+
+// Keep old function for backwards compatibility
+function create3DBook() {
+    createPureCSS3DBook();
 }
 
 // Switch between 2D and 3D reading modes
@@ -951,8 +1080,11 @@ function setReadingMode(mode) {
         book3d.style.display = 'block';
         book3d.classList.remove('hidden');
         
-        // Create simple 3D book with current page content
-        create3DBook();
+        // Force recreation of 3D book with current page content
+        setTimeout(() => {
+            create3DBook();
+            console.log('3D book created with current page:', currentPage + 1);
+        }, 100);
         
         console.log('Switched to 3D book mode');
     } else {
